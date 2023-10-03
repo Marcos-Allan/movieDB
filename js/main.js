@@ -19,33 +19,9 @@ function toggleTheme() {
     }
 }
 
-const movies = [
-    {
-      image: 'https://img.elo7.com.br/product/original/3FBA809/big-poster-filme-batman-2022-90x60-cm-lo002-poster-batman.jpg',
-      title: 'Batman',
-      rating: 9.2,
-      year: 2022,
-      description: 'Descrição do filme…',
-      isFavorited: true,
-    },
-    {
-      image: 'https://upload.wikimedia.org/wikipedia/pt/thumb/9/9b/Avengers_Endgame.jpg/250px-Avengers_Endgame.jpg',
-      title: 'Avengers',
-      rating: 9.2,
-      year: 2019,
-      description: 'Descrição do filme…',
-      isFavorited: false
-    },
-    {
-      image: 'https://upload.wikimedia.org/wikipedia/en/1/17/Doctor_Strange_in_the_Multiverse_of_Madness_poster.jpg',
-      title: 'Doctor Strange',
-      rating: 9.2,
-      year: 2022,
-      description: 'Descrição do filme…',
-      isFavorited: false
-    },
-  ]
 function renderMovie(movie){
+        let dataFormatada = movie.release_date.split('-')
+        dataFormatada = `${dataFormatada[2]}-${dataFormatada[1]}-${dataFormatada[0]}`
 
         let divCardFilm = document.createElement('section')
         divCardFilm.classList.add('cardFilm')
@@ -61,17 +37,20 @@ function renderMovie(movie){
         let imgFilm = document.createElement('img')
         imgFilm.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`
         let titleFilm = document.createElement('h2')
-        titleFilm.innerText = `${movie.original_title} (${movie.release_date})`
+        titleFilm.innerHTML = `${movie.title} <br> (${dataFormatada})`
         let divAvaliationsFilms = document.createElement('div')
         divAvaliationsFilms.classList.add('avaliations')
         
-        let divAvaliationSFilm = document.createElement('div')
-        divAvaliationSFilm.classList.add('avaliation')
+        let divAvaliationSFilm1 = document.createElement('div')
+        divAvaliationSFilm1.classList.add('avaliation')
+        
+        let divAvaliationSFilm2 = document.createElement('div')
+        divAvaliationSFilm2.classList.add('avaliation')
 
         let imgFav = document.createElement('img')
         imgFav.src = 'imgs/Vector (1).png'
         let favText = document.createElement('p')
-        favText.innerText = movie.vote_average
+        favText.innerText = movie.vote_average.toFixed(1)
         favText.classList.add('infoText')
         let imgLike = document.createElement('img')
         imgLike.src = 'imgs/Vector.png'
@@ -90,14 +69,14 @@ function renderMovie(movie){
         divAvaliationFilm.appendChild(titleFilm)
         divAvaliationFilm.appendChild(divAvaliationsFilms)
         //1 VEZ
-        divAvaliationsFilms.appendChild(divAvaliationSFilm)
-        divAvaliationSFilm.appendChild(imgFav)
-        divAvaliationSFilm.appendChild(favText)
+        divAvaliationSFilm1.appendChild(imgFav)
+        divAvaliationSFilm1.appendChild(favText)
+        divAvaliationsFilms.appendChild(divAvaliationSFilm1)
         
         //2 VEZ
-        divAvaliationsFilms.appendChild(divAvaliationSFilm)
-        divAvaliationSFilm.appendChild(imgLike)
-        divAvaliationSFilm.appendChild(likeText)
+        divAvaliationSFilm2.appendChild(imgLike)
+        divAvaliationSFilm2.appendChild(likeText)
+        divAvaliationsFilms.appendChild(divAvaliationSFilm2)
         
         divInfoFilm.appendChild(infoFilmText)
 
@@ -116,15 +95,9 @@ const options = {method: 'GET', headers: {accept: 'application/json'}};
 fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apikey}&language=pt-br`)
 .then(response => response.json())
 .then(data => {
-    console.log(data.results[0])
-    renderMovie(data.results[1])
-    renderMovie(data.results[2])
-    renderMovie(data.results[3])
-    renderMovie(data.results[4])
-    renderMovie(data.results[5])
-    renderMovie(data.results[6])
-    renderMovie(data.results[7])
-    renderMovie(data.results[8])
-    renderMovie(data.results[9])
+    
+    for(let i = 0; i < data.results.length; i++){
+      renderMovie(data.results[i])
+    }
 })
 .catch(err => console.error(err));
