@@ -24,6 +24,7 @@ function busca(title){
             for(let i = 0; i < data.results.length; i++){
                 renderMovie(data.results[i])
             }
+            favoritar()
         }else{
             main.innerHTML = '<h2>Filme não encontrado verifique se escreveu corretamente</h2>'
         }
@@ -83,12 +84,13 @@ function renderMovie(movie){
         favText.classList.add('infoText')
         let imgLike = document.createElement('img')
         imgLike.src = 'imgs/Vector.png'
+        imgLike.classList.add('imgLike')
         let likeText = document.createElement('p')
         likeText.innerText = 'Favoritar'
         likeText.classList.add('infoText')
         let infoFilmText = document.createElement('p')
         infoFilmText.innerText = movie.overview
-
+        
         divCardFilm.appendChild(divImgFilm)
         divCardFilm.appendChild(divAvaliationFilm)
         divCardFilm.appendChild(divInfoFilm)
@@ -97,6 +99,7 @@ function renderMovie(movie){
         
         divAvaliationFilm.appendChild(titleFilm)
         divAvaliationFilm.appendChild(divAvaliationsFilms)
+        
         //1 VEZ
         divAvaliationSFilm1.appendChild(imgFav)
         divAvaliationSFilm1.appendChild(favText)
@@ -104,6 +107,7 @@ function renderMovie(movie){
         
         //2 VEZ
         divAvaliationSFilm2.appendChild(imgLike)
+        divAvaliationSFilm2.classList.add('divLike')
         divAvaliationSFilm2.appendChild(likeText)
         divAvaliationsFilms.appendChild(divAvaliationSFilm2)
         
@@ -113,21 +117,32 @@ function renderMovie(movie){
 
 }
 
-// renderMovie(movies[0])
-// renderMovie(movies[1])
-// renderMovie(movies[2])
+function favoritar(){
+    let divFavs = [...document.querySelectorAll('.divLike')]
+    let iconsFavs = [...document.querySelectorAll('.imgLike')]
 
-let url = 'https://api.themoviedb.org/3/movie/157336?api_key=27cbf9ed3bea8b3418b4bbc539dd7493 https://api.themoviedb.org/3/movie/157336/videos?api_key=27cbf9ed3bea8b3418b4bbc539dd7493'
+    divFavs.map((dv, i) => {
+        let isFv = false
+        dv.addEventListener('click', () => {
+            isFv = !isFv
+            isFv == true ? iconsFavs[i].src = 'imgs/Vector(M).png' : iconsFavs[i].src = 'imgs/Vector.png'
+        })
+    })
+}
 
-const options = {method: 'GET', headers: {accept: 'application/json'}};
+function getDados(){
+    let url = 'https://api.themoviedb.org/3/movie/157336?api_key=27cbf9ed3bea8b3418b4bbc539dd7493 https://api.themoviedb.org/3/movie/157336/videos?api_key=27cbf9ed3bea8b3418b4bbc539dd7493'
 
-fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apikey}&language=pt-br`)
-.then(response => response.json())
-.then(data => {
-    
-    for(let i = 0; i < data.results.length; i++){
-      renderMovie(data.results[i])
-    }
-})
-.catch(err => console.error(err));
+    fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apikey}&language=pt-br`)
+    .then(response => response.json())
+    .then(data => {
+        
+        for(let i = 0; i < data.results.length; i++){
+        renderMovie(data.results[i])
+        }
+        favoritar()
+    })
+    .catch(err => console.error(err));
+}
 
+getDados()
