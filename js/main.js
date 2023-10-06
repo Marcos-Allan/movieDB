@@ -2,6 +2,9 @@ let inputCheck = document.querySelector('.divCheckbox')
 let textCheck = document.querySelector('.labelfav')
 let imgCheck = document.querySelector('.imgCheck')
 
+let filmsFavsMark = []
+let filmsFavsMarked = []
+
 const form = document.querySelector('form')
 const inputText = document.querySelector('#isearch')
 
@@ -24,7 +27,8 @@ function busca(title){
             for(let i = 0; i < data.results.length; i++){
                 renderMovie(data.results[i])
             }
-            favoritar()
+            
+            favoritar(false)
         }else{
             main.innerHTML = '<h2>Filme não encontrado verifique se escreveu corretamente</h2>'
         }
@@ -44,8 +48,16 @@ function toggleTheme() {
     
     if(imgCheck.style.display == 'block'){
         imgCheck.style.display = 'none'
+        main.innerHTML = ''
+        getDados()
     }else{
         imgCheck.style.display = 'block'
+        main.innerHTML = ''
+        filmsFavsMarked.map((film) => {
+            renderMovie(film)
+        })
+        
+        favoritar(true)
     }
 }
 
@@ -67,7 +79,7 @@ function renderMovie(movie){
         let imgFilm = document.createElement('img')
         imgFilm.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`
         let titleFilm = document.createElement('h2')
-        titleFilm.innerHTML = `${movie.title} <br> (${dataFormatada})`
+        titleFilm.innerHTML = `${movie.title} <br> <span>(${dataFormatada})</span>`
         let divAvaliationsFilms = document.createElement('div')
         divAvaliationsFilms.classList.add('avaliations')
         
@@ -83,13 +95,19 @@ function renderMovie(movie){
         favText.innerText = movie.vote_average.toFixed(1)
         favText.classList.add('infoText')
         let imgLike = document.createElement('img')
-        imgLike.src = 'imgs/Vector.png'
         imgLike.classList.add('imgLike')
         let likeText = document.createElement('p')
-        likeText.innerText = 'Favoritar'
         likeText.classList.add('infoText')
         let infoFilmText = document.createElement('p')
         infoFilmText.innerText = movie.overview
+        
+        if(movie.isFV){
+            imgLike.src = 'imgs/Vector(M).png'
+            likeText.innerText = 'Desfavoritar'
+        }else{
+            imgLike.src = 'imgs/Vector.png'
+            likeText.innerText = 'Favoritar'
+        }
         
         divCardFilm.appendChild(divImgFilm)
         divCardFilm.appendChild(divAvaliationFilm)
@@ -117,21 +135,58 @@ function renderMovie(movie){
 
 }
 
-function favoritar(){
+function favoritar(isFv){
     let divFavs = [...document.querySelectorAll('.divLike')]
     let iconsFavs = [...document.querySelectorAll('.imgLike')]
 
     divFavs.map((dv, i) => {
-        let isFv = false
         dv.addEventListener('click', () => {
+            // ACESSA A DIV DO CARD
+            const dvFilmFV = dv.parentNode.parentNode.parentNode
+            console.log(dvFilmFV)
+            
+            let poster_path = dvFilmFV.children[0].children[0].src.split('w500')[1]
+            
+            let title = dvFilmFV.children[1].children[0].innerText.split('(')[0]
+            
+            let release_date = dvFilmFV.children[1].children[0].innerText.split('(')[1].split(')')[0].split('-')
+            release_date = `${release_date[2]}-${release_date[1]}-${release_date[0]}`
+            
+            let overview = dvFilmFV.children[2].children[0].innerText
+
+            let vote_average = Number(dvFilmFV.children[1].children[1].children[0].children[1].innerText)
+            console.log(vote_average)
+            let isFV = true
+
+            let mvFV = {poster_path, title, release_date, overview, vote_average, isFV}
+
+            
+            filmsFavsMark.push(mvFV)
+            
             isFv = !isFv
-            isFv == true ? iconsFavs[i].src = 'imgs/Vector(M).png' : iconsFavs[i].src = 'imgs/Vector.png'
+            if(isFv == true){
+                iconsFavs[i].src = 'imgs/Vector(M).png'
+                filmsFavsMarked.push(mvFV)
+                let rep = 0
+                for (let i = 0; i < filmsFavsMarked.length; i++) {
+                    const search = filmsFavsMarked[i].title;
+                    if(search == mvFV.title){
+                        rep++
+                    }
+                    if(rep == 2){
+                        filmsFavsMarked.pop()
+                    }
+                    console.log(`${i}: ${search}`)
+                }
+            }else{
+                iconsFavs[i].src = 'imgs/Vector.png'
+                // console.log(dv.parentNode.parentNode.parentNode.children[1].children[0].innerText)
+            }
         })
     })
 }
 
 function getDados(){
-    let url = 'https://api.themoviedb.org/3/movie/157336?api_key=27cbf9ed3bea8b3418b4bbc539dd7493 https://api.themoviedb.org/3/movie/157336/videos?api_key=27cbf9ed3bea8b3418b4bbc539dd7493'
 
     fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apikey}&language=pt-br`)
     .then(response => response.json())
@@ -140,7 +195,8 @@ function getDados(){
         for(let i = 0; i < data.results.length; i++){
         renderMovie(data.results[i])
         }
-        favoritar()
+        
+        favoritar(false)
     })
     .catch(err => console.error(err));
 }
