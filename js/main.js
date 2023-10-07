@@ -4,6 +4,7 @@ let imgCheck = document.querySelector('.imgCheck')
 
 let filmsFavsMark = []
 let filmsFavsMarked = []
+let isFV = true
 
 const form = document.querySelector('form')
 const inputText = document.querySelector('#isearch')
@@ -17,7 +18,7 @@ function busca(title){
     inputText.value = ''
     inputText.blur()
 
-    fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apikey}&query=${title}&language=en-US&page=1`)
+    fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apikey}&query=${title}&language=pt-br-US&page=1`)
     // fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apikey}&language=pt-br`)
     .then(response => response.json())
     .then(data => {
@@ -25,7 +26,7 @@ function busca(title){
         if(data.results.length >= 1){
             main.innerHTML = '<h2>Resultados: </h2>'
             for(let i = 0; i < data.results.length; i++){
-                renderMovie(data.results[i])
+                renderMovie(data.results[i], false)
             }
             
             favoritar(false)
@@ -52,16 +53,21 @@ function toggleTheme() {
         getDados()
     }else{
         imgCheck.style.display = 'block'
-        main.innerHTML = ''
-        filmsFavsMarked.map((film) => {
-            renderMovie(film)
-        })
-        
-        favoritar(true)
+        if(filmsFavsMarked.length > 0){
+            main.innerHTML = ''
+            filmsFavsMarked.map((film) => {
+                renderMovie(film, true)
+            })
+            
+            favoritar(true)
+        }else{
+            main.innerHTML = '<p class="msgError">Você não marcou nenhum filme como favorito</p>'
+        }
     }
 }
 
-function renderMovie(movie){
+function renderMovie(movie, isFavoritado = false){
+
         let dataFormatada = movie.release_date.split('-')
         dataFormatada = `${dataFormatada[2]}-${dataFormatada[1]}-${dataFormatada[0]}`
 
@@ -79,7 +85,7 @@ function renderMovie(movie){
         let imgFilm = document.createElement('img')
         imgFilm.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`
         let titleFilm = document.createElement('h2')
-        titleFilm.innerHTML = `${movie.title} <br> <span>(${dataFormatada})</span>`
+        titleFilm.innerHTML = `${movie.title}<span>(${dataFormatada})</span>`
         let divAvaliationsFilms = document.createElement('div')
         divAvaliationsFilms.classList.add('avaliations')
         
@@ -88,7 +94,7 @@ function renderMovie(movie){
         
         let divAvaliationSFilm2 = document.createElement('div')
         divAvaliationSFilm2.classList.add('avaliation')
-
+        
         let imgFav = document.createElement('img')
         imgFav.src = 'imgs/Vector (1).png'
         let favText = document.createElement('p')
@@ -98,10 +104,11 @@ function renderMovie(movie){
         imgLike.classList.add('imgLike')
         let likeText = document.createElement('p')
         likeText.classList.add('infoText')
+        likeText.classList.add('infoTextLike')
         let infoFilmText = document.createElement('p')
         infoFilmText.innerText = movie.overview
         
-        if(movie.isFV){
+        if(movie.isFV == false){
             imgLike.src = 'imgs/Vector(M).png'
             likeText.innerText = 'Desfavoritar'
         }else{
@@ -138,12 +145,12 @@ function renderMovie(movie){
 function favoritar(isFv){
     let divFavs = [...document.querySelectorAll('.divLike')]
     let iconsFavs = [...document.querySelectorAll('.imgLike')]
+    let textsFavs = [...document.querySelectorAll('.infoTextLike')]
 
     divFavs.map((dv, i) => {
         dv.addEventListener('click', () => {
             // ACESSA A DIV DO CARD
             const dvFilmFV = dv.parentNode.parentNode.parentNode
-            console.log(dvFilmFV)
             
             let poster_path = dvFilmFV.children[0].children[0].src.split('w500')[1]
             
@@ -155,32 +162,49 @@ function favoritar(isFv){
             let overview = dvFilmFV.children[2].children[0].innerText
 
             let vote_average = Number(dvFilmFV.children[1].children[1].children[0].children[1].innerText)
-            console.log(vote_average)
-            let isFV = true
 
             let mvFV = {poster_path, title, release_date, overview, vote_average, isFV}
 
-            
             filmsFavsMark.push(mvFV)
             
             isFv = !isFv
             if(isFv == true){
                 iconsFavs[i].src = 'imgs/Vector(M).png'
+                textsFavs[i].innerText = 'Desfavoritar'
                 filmsFavsMarked.push(mvFV)
+                
                 let rep = 0
                 for (let i = 0; i < filmsFavsMarked.length; i++) {
-                    const search = filmsFavsMarked[i].title;
-                    if(search == mvFV.title){
+                    if(title == filmsFavsMarked[i].title){
                         rep++
+                        if(rep == 2){
+                            filmsFavsMarked.pop()
+                            return
+                        }
                     }
-                    if(rep == 2){
-                        filmsFavsMarked.pop()
-                    }
-                    console.log(`${i}: ${search}`)
                 }
+                
+                
             }else{
                 iconsFavs[i].src = 'imgs/Vector.png'
-                // console.log(dv.parentNode.parentNode.parentNode.children[1].children[0].innerText)
+                textsFavs[i].innerText = 'Favoritar'
+                let filmRmv = title
+                filmsFavsMark = filmsFavsMarked.filter((film) => film.title != filmRmv);
+            }
+
+            filmsFavsMarked.length = 0
+            for(let i = 0;i < filmsFavsMark.length; i++){
+                filmsFavsMarked[i] = filmsFavsMark[i]
+            }
+            if(inputCheck.classList.contains('check')){
+                main.innerHTML = ''
+                filmsFavsMarked.map((film) => {
+                    renderMovie(film, true)
+                })
+                favoritar(true)
+                if(filmsFavsMarked.length == 0){
+                    main.innerHTML = '<p class="msgError">Você não marcou nenhum filme como favorito</p>'
+                }
             }
         })
     })
@@ -192,8 +216,28 @@ function getDados(){
     .then(response => response.json())
     .then(data => {
         
-        for(let i = 0; i < data.results.length; i++){
-        renderMovie(data.results[i])
+        // for(let i = 0; i < data.results.length; i++){
+            //     renderMovie(data.results[i], false)
+            // }
+            if(filmsFavsMarked.length >= 1){
+            let th = filmsFavsMarked[0].title
+            let tf = data.results[0].title
+            // td = tt.pop()
+            console.log(th)
+            console.log(tf)
+            console.log(tf == th)
+
+            for(let i = 0; i < data.results.length; i++){
+                if(filmsFavsMarked[i].title == data.results[i].title){
+                    renderMovie(data.results[i], true)
+                }else{
+                    renderMovie(data.results[i], false)
+                }
+            }
+        }else{
+            for(let i = 0; i < data.results.length; i++){
+                renderMovie(data.results[i], false)
+            }
         }
         
         favoritar(false)
