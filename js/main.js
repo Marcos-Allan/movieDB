@@ -5,6 +5,7 @@ let imgCheck = document.querySelector('.imgCheck')
 let filmsFavsMark = []
 let filmsFavsMarked = []
 let isFV = true
+let isFocus = false
 
 const form = document.querySelector('form')
 const inputText = document.querySelector('#isearch')
@@ -19,42 +20,20 @@ function busca(title){
     inputText.blur()
 
     fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apikey}&query=${title}&language=pt-br`)
-    // fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apikey}&language=pt-br`)
     .then(response => response.json())
     .then(data => {
         
-        // FUNÇÃO ORIGINAL (DA CERTO)
-        // if(data.results.length >= 1){
-        //     main.innerHTML = '<h2>Resultados: </h2>'
-        //     for(let i = 0; i < data.results.length; i++){
-        //         renderMovie(data.results[i], false)
-        //     }
-            
-        //     favoritar(false)
-            
-        // }else{
-        //     main.innerHTML = '<h2>Filme não encontrado verifique se escreveu corretamente</h2>'
-        // }
-
-        main.innerHTML = '<h2>Resultados: </h2>'
-        if(filmsFavsMarked.length > 0){
-            data.results.map((film, i) => {
-                // console.log("FFM: "+filmsFavsMarked[i].title)
-                // console.log("FTT: "+film.title)
-                // console.log(film.title == filmsFavsMarked[i].title)
-                if(filmsFavsMarked[i] && film.title == filmsFavsMarked[i].title){
-                    renderMovie(film, true)
-                }else{
-                    renderMovie(film, false)
-                }
-            })
-            }else{
-                for (let i = 0; i < data.results.length; i++) {
-                    renderMovie(data.results[i], false)
-                }
+        if(data.results.length >= 1){
+            main.innerHTML = '<h2>Resultados: </h2>'
+            for(let i = 0; i < data.results.length; i++){
+                renderMovie(data.results[i], false)
             }
-        
-        favoritar(true)
+            
+            favoritar(false)
+            
+        }else{
+            main.innerHTML = '<h2>Filme não encontrado verifique se escreveu corretamente</h2>'
+        }
 
     })
     .catch((err) => console.log(err))
@@ -66,6 +45,20 @@ const main = document.querySelector('main')
 
 inputCheck.addEventListener('click', toggleTheme)
 textCheck.addEventListener('click', toggleTheme)
+inputText.addEventListener('blur', () => {
+    isFocus = false
+})
+
+window.addEventListener('keypress', (evt) => {
+    if(isFocus == false){
+        if(evt.key == 'm'){
+           toggleTheme() 
+        }
+    }
+})
+inputText.addEventListener('focus', () => {
+    isFocus = true
+})
 
 function toggleTheme() {
     inputCheck.classList.toggle('check')
@@ -79,30 +72,11 @@ function toggleTheme() {
         if(filmsFavsMarked.length > 0){
             main.innerHTML = ''
             
-            //FUNÇÃO ORIGINAL DA CERTO
             filmsFavsMarked.map((film) => {
                 renderMovie(film, true)
             })
             
             favoritar(true)
-
-            // REFORMULAR TROCAR DATA PARA OS FILMES DAS DIVS
-            // if(filmsFavsMarked.length > 0){
-            //     data.results.map((film, i) => {
-            //         if(filmsFavsMarked[i] && film.title == filmsFavsMarked[i].title){
-            //             renderMovie(film, true)
-            //         }else{
-            //             renderMovie(film, false)
-            //         }
-            //     })
-            //     }else{
-            //         for (let i = 0; i < data.results.length; i++) {
-            //             renderMovie(data.results[i], false)
-            //         }
-            //     }
-            
-            // favoritar(false)
-            // VAI ATÉ AQUI
 
         }else{
             main.innerHTML = '<p class="msgError">Você não marcou nenhum filme como favorito</p>'
@@ -112,6 +86,14 @@ function toggleTheme() {
 
 function renderMovie(movie, isFavoritado = false){
 
+    if(filmsFavsMarked.length > 0){
+        filmsFavsMarked.map((film) => {
+            if(movie.title == film.title){
+                isFavoritado = true
+            }
+        })
+    }
+    if(movie){
         let dataFormatada = movie.release_date.split('-')
         dataFormatada = `${dataFormatada[2]}-${dataFormatada[1]}-${dataFormatada[0]}`
 
@@ -181,8 +163,9 @@ function renderMovie(movie, isFavoritado = false){
         divAvaliationsFilms.appendChild(divAvaliationSFilm2)
         
         divInfoFilm.appendChild(infoFilmText)
-
+        
         main.appendChild(divCardFilm)
+    }
 
 }
 
@@ -217,7 +200,7 @@ function favoritar(isFv){
                 iconsFavs[i].src = 'imgs/Vector(M).png'
                 textsFavs[i].innerText = 'Desfavoritar'
                 filmsFavsMarked.push(mvFV)
-                
+
                 let rep = 0
                 for (let i = 0; i < filmsFavsMarked.length; i++) {
                     if(title == filmsFavsMarked[i].title){
@@ -244,28 +227,10 @@ function favoritar(isFv){
             if(inputCheck.classList.contains('check')){
                 main.innerHTML = ''
                 // FUNÇÃO ORIGINAL (DA CERTO)
-                // filmsFavsMarked.map((film) => {
-                //     renderMovie(film, true)
-                // })
-                // favoritar(true)
-
-                // REFORMULAR TROCAR DATA PARA OS FILMES DAS DIVS
-                if(filmsFavsMarked.length > 0){
-                    data.results.map((film, i) => {
-                        if(filmsFavsMarked[i] && film.title == filmsFavsMarked[i].title){
-                            renderMovie(film, true)
-                        }else{
-                            renderMovie(film, false)
-                        }
-                    })
-                    }else{
-                        for (let i = 0; i < data.results.length; i++) {
-                            renderMovie(data.results[i], false)
-                        }
-                    }
-                
-                favoritar(false)
-                // VAI ATÉ AQUI
+                filmsFavsMarked.map((film) => {
+                    renderMovie(film, true)
+                })
+                favoritar(true)
 
                 if(filmsFavsMarked.length == 0){
                     main.innerHTML = '<p class="msgError">Você não marcou nenhum filme como favorito</p>'
@@ -281,21 +246,11 @@ function getDados(){
     .then(response => response.json())
     .then(data => {
         
-        if(filmsFavsMarked.length > 0){
-            data.results.map((film, i) => {
-                if(filmsFavsMarked[i] && film.title == filmsFavsMarked[i].title){
-                    renderMovie(film, true)
-                }else{
-                    renderMovie(film, false)
-                }
-            })
-            }else{
-                for (let i = 0; i < data.results.length; i++) {
-                    renderMovie(data.results[i], false)
-                }
-            }
-        
+        for(let i = 0;i < data.results.length; i++){
+            renderMovie(data.results[i], false)
+        }
         favoritar(false)
+
     })
     .catch(err => console.error(err));
 }
