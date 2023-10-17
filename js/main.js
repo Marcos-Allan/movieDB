@@ -6,6 +6,7 @@ let filmsFavsMark = []
 let filmsFavsMarked = []
 let isFV = true
 let isFocus = false
+let dadosLocalsorage = undefined
 
 const form = document.querySelector('form')
 const inputText = document.querySelector('#isearch')
@@ -61,6 +62,39 @@ inputText.addEventListener('focus', () => {
 })
 
 function toggleTheme() {
+    
+    dadosLocalsorage = localStorage.getItem('filmsFavsMarked')
+    if(dadosLocalsorage != undefined){
+        // PEGAR FILMES SALVOS COMO FAVORITO NO LOCALSTORAGE
+        dadosLocalsorage = dadosLocalsorage.split('[')[1]
+        dadosLocalsorage = dadosLocalsorage.split(']')[0]
+        dadosLocalsorage = dadosLocalsorage.split('},')
+        console.log(dadosLocalsorage)
+        // filmsFavsMarked.length = 0)
+        
+        // let posterPath = 
+        // console.log(posterPath)
+
+        let otherFilm = []
+        dadosLocalsorage.map((el) => {
+            el = el.split('"')
+            console.log(filmsFavsMarked)
+            let poster_path = el[3]
+            let title = el[7]
+            let release_date = el[11]
+            let overview = el[15]
+            let vote_average = Number(el[18].split(':')[1].split(',')[0])
+            let isFV = Boolean(el[20].split(':')[1].split('}')[0])
+
+            let mvFV = {poster_path, title, release_date, overview, vote_average, isFV}
+            otherFilm.push(mvFV)
+        })
+
+        filmsFavsMarked.length = 0
+        for(let i = 0; i < otherFilm.length; i++){
+            filmsFavsMarked[i] = otherFilm[i]
+        }
+    }
     inputCheck.classList.toggle('check')
     
     if(imgCheck.style.display == 'block'){
@@ -200,6 +234,14 @@ function favoritar(isFv){
                 iconsFavs[i].src = 'imgs/Vector(M).png'
                 textsFavs[i].innerText = 'Desfavoritar'
                 filmsFavsMarked.push(mvFV)
+
+                // SALVAR FILME NO LOCALSTOEAGE
+                localStorage.setItem('filmsFavsMarked', JSON.stringify(filmsFavsMarked))
+                dadosLocalsorage = localStorage.getItem('filmsFavsMarked')
+                // dadosLocalsorage = dadosLocalsorage.split('[')[1]
+                // dadosLocalsorage = dadosLocalsorage.split(']')[0]
+                // dadosLocalsorage = dadosLocalsorage.split('},')
+                // console.log(dadosLocalsorage)
 
                 let rep = 0
                 for (let i = 0; i < filmsFavsMarked.length; i++) {
