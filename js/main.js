@@ -61,59 +61,99 @@ inputText.addEventListener('focus', () => {
     isFocus = true
 })
 
-function toggleTheme() {
-    
-    dadosLocalsorage = localStorage.getItem('filmsFavsMarked')
-    if(dadosLocalsorage != undefined){
-        // PEGAR FILMES SALVOS COMO FAVORITO NO LOCALSTORAGE
-        dadosLocalsorage = dadosLocalsorage.split('[')[1]
-        dadosLocalsorage = dadosLocalsorage.split(']')[0]
-        dadosLocalsorage = dadosLocalsorage.split('},')
-        console.log(dadosLocalsorage)
-        // filmsFavsMarked.length = 0)
-        
-        // let posterPath = 
-        // console.log(posterPath)
-
-        let otherFilm = []
-        dadosLocalsorage.map((el) => {
-            el = el.split('"')
-            console.log(filmsFavsMarked)
-            let poster_path = el[3]
-            let title = el[7]
-            let release_date = el[11]
-            let overview = el[15]
-            let vote_average = Number(el[18].split(':')[1].split(',')[0])
-            let isFV = Boolean(el[20].split(':')[1].split('}')[0])
-
-            let mvFV = {poster_path, title, release_date, overview, vote_average, isFV}
-            otherFilm.push(mvFV)
-        })
-
-        filmsFavsMarked.length = 0
-        for(let i = 0; i < otherFilm.length; i++){
-            filmsFavsMarked[i] = otherFilm[i]
-        }
-    }
-    inputCheck.classList.toggle('check')
-    
-    if(imgCheck.style.display == 'block'){
-        imgCheck.style.display = 'none'
-        main.innerHTML = ''
-        getDados()
-    }else{
-        imgCheck.style.display = 'block'
-        if(filmsFavsMarked.length > 0){
-            main.innerHTML = ''
+function toggleTheme(onetime=false) {
+    if(onetime == true){
+        dadosLocalsorage = localStorage.getItem('filmsFavsMarked')
+        if(dadosLocalsorage != undefined){
+            // PEGAR FILMES SALVOS COMO FAVORITO NO LOCALSTORAGE
+            // dadosLocalsorage = dadosLocalsorage.split('[')[1]
+            // dadosLocalsorage = dadosLocalsorage.split(']')[0]
+            // dadosLocalsorage = dadosLocalsorage.split('},')
             
-            filmsFavsMarked.map((film) => {
-                renderMovie(film, true)
+            dadosLocalsorage = JSON.parse(dadosLocalsorage)
+
+            console.log(dadosLocalsorage)
+            // filmsFavsMarked.length = 0)
+            
+            // let posterPath = 
+            // console.log(posterPath)
+            
+            let otherFilm = []
+            dadosLocalsorage.map((el) => {
+                // el = el.split('"')
+                console.log(filmsFavsMarked)
+                let poster_path = el.poster_path
+                let title = el.title
+                let release_date = el.release_date
+                let overview = el.overview
+                let vote_average = el.vote_average
+                let isFV = el.isFV
+
+                let mvFV = {poster_path, title, release_date, overview, vote_average, isFV}
+                otherFilm.push(mvFV)
             })
-            
-            favoritar(true)
 
+            filmsFavsMarked.length = 0
+            for(let i = 0; i < otherFilm.length; i++){
+                filmsFavsMarked[i] = otherFilm[i]
+            }
+        }
+    }else{
+        dadosLocalsorage = localStorage.getItem('filmsFavsMarked')
+        if(dadosLocalsorage != undefined){
+            // PEGAR FILMES SALVOS COMO FAVORITO NO LOCALSTORAGE
+            // dadosLocalsorage = dadosLocalsorage.split('[')[1]
+            // dadosLocalsorage = dadosLocalsorage.split(']')[0]
+            // dadosLocalsorage = dadosLocalsorage.split('},')
+            
+            dadosLocalsorage = JSON.parse(dadosLocalsorage)
+
+            console.log(dadosLocalsorage)
+            // filmsFavsMarked.length = 0)
+            
+            // let posterPath = 
+            // console.log(posterPath)
+            
+            let otherFilm = []
+            dadosLocalsorage.map((el) => {
+                // el = el.split('"')
+                console.log(filmsFavsMarked)
+                let poster_path = el.poster_path
+                let title = el.title
+                let release_date = el.release_date
+                let overview = el.overview
+                let vote_average = el.vote_average
+                let isFV = el.isFV
+
+                let mvFV = {poster_path, title, release_date, overview, vote_average, isFV}
+                otherFilm.push(mvFV)
+            })
+
+            filmsFavsMarked.length = 0
+            for(let i = 0; i < otherFilm.length; i++){
+                filmsFavsMarked[i] = otherFilm[i]
+            }
+        }
+        inputCheck.classList.toggle('check')
+        
+        if(imgCheck.style.display == 'block'){
+            imgCheck.style.display = 'none'
+            main.innerHTML = ''
+            getDados()
         }else{
-            main.innerHTML = '<p class="msgError">Você não marcou nenhum filme como favorito</p>'
+            imgCheck.style.display = 'block'
+            if(filmsFavsMarked.length > 0){
+                main.innerHTML = ''
+                
+                filmsFavsMarked.map((film) => {
+                    renderMovie(film, true)
+                })
+                
+                favoritar(true)
+                
+            }else{
+                main.innerHTML = '<p class="msgError">Você não marcou nenhum filme como favorito</p>'
+            }
         }
     }
 }
@@ -127,6 +167,7 @@ function renderMovie(movie, isFavoritado = false){
             }
         })
     }
+
     if(movie){
         let dataFormatada = movie.release_date.split('-')
         dataFormatada = `${dataFormatada[2]}-${dataFormatada[1]}-${dataFormatada[0]}`
@@ -233,38 +274,26 @@ function favoritar(isFv){
             if(isFv == true){
                 iconsFavs[i].src = 'imgs/Vector(M).png'
                 textsFavs[i].innerText = 'Desfavoritar'
+
+                filmsFavsMarked = filmsFavsMarked.filter((mv) => mv.title !== mvFV.title)
+
                 filmsFavsMarked.push(mvFV)
 
-                // SALVAR FILME NO LOCALSTOEAGE
+                // SALVAR FILME NO LOCALSTORAGE
                 localStorage.setItem('filmsFavsMarked', JSON.stringify(filmsFavsMarked))
                 dadosLocalsorage = localStorage.getItem('filmsFavsMarked')
-                // dadosLocalsorage = dadosLocalsorage.split('[')[1]
-                // dadosLocalsorage = dadosLocalsorage.split(']')[0]
-                // dadosLocalsorage = dadosLocalsorage.split('},')
-                // console.log(dadosLocalsorage)
-
-                let rep = 0
-                for (let i = 0; i < filmsFavsMarked.length; i++) {
-                    if(title == filmsFavsMarked[i].title){
-                        rep++
-                        if(rep == 2){
-                            filmsFavsMarked.pop()
-                            return
-                        }
-                    }
-                }
                 
                 
             }else{
                 iconsFavs[i].src = 'imgs/Vector.png'
                 textsFavs[i].innerText = 'Favoritar'
                 let filmRmv = title
-                filmsFavsMark = filmsFavsMarked.filter((film) => film.title != filmRmv);
-            }
+                filmsFavsMark = filmsFavsMarked.filter((film) => film.title == filmRmv);
+                localStorage.setItem('filmsFavsMarked', JSON.stringify(filmsFavsMarked.filter((film) => film.title != filmRmv)))
 
-            filmsFavsMarked.length = 0
-            for(let i = 0;i < filmsFavsMark.length; i++){
-                filmsFavsMarked[i] = filmsFavsMark[i]
+                filmsFavsMarked.map((film) => {
+                    renderMovie(film, true)
+                })
             }
             if(inputCheck.classList.contains('check')){
                 main.innerHTML = ''
@@ -297,4 +326,8 @@ function getDados(){
     .catch(err => console.error(err));
 }
 
-getDados()
+// getDados()
+document.addEventListener('DOMContentLoaded', () => {
+    toggleTheme(true)
+    getDados()
+})
